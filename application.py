@@ -1,16 +1,17 @@
-# thanks to
+# Thanks to Anya Zhang:
 # https://medium.com/@anyazhang/publishing-a-flask-web-app-from-the-cs50-ide-to-heroku-osx-e00a45338c14
 
 # coding: utf-8
 
 # from library50 import cs50
+from decimal import *
 from flask import Flask, flash, redirect, render_template, request, session, url_for
 from flask_session import Session
 from passlib.apps import custom_app_context as pwd_context
 from passlib.context import CryptContext
 from tempfile import mkdtemp
 
-# why wouldn;t tbis just be 'import helpers'?
+# why wouldn't tbis just be 'import helpers'?
 from decimal import *
 from helpers import *
 
@@ -19,10 +20,25 @@ import os
 import sqlalchemy
 import time
 
+# https://medium.com/@anyazhang/publishing-a-flask-web-app-from-the-cs50-ide-to-heroku-osx-e00a45338c14:
+# "Add to your python file" 
+import urllib.parse as urlparse
+import psycopg2
+
+urlparse.uses_netloc.append("postgres")
+url = urlparse.urlparse(os.environ["DATABASE_URL"])
+
+conn = psycopg2.connect(
+	database=url.username,
+	user=url.username,
+	password=url.password,
+	host=url.hostname,
+	port=url.port
+)
+
 
 # added as per the following
 # https://medium.com/@anyazhang/publishing-a-flask-web-app-from-the-cs50-ide-to-heroku-osx-e00a45338c14
-
 class SQL(object):
     def __init__(self, url):
         try:
@@ -70,11 +86,17 @@ app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
 # configure CS50 Library to use SQLite database
-db = SQL("sqlite:///db.db")
+# https://medium.com/@anyazhang/publishing-a-flask-web-app-from-the-cs50-ide-to-heroku-osx-e00a45338c14:
+# "Change the line that used to read"
+# db = SQL("sqlite:///db.db")
+# "to"
+db = SQL(os.environ["DATABASE_URL"])
+# db = sqlalchemy(app)
 
 # global
 stock_names = []
-
+        
+        
 @app.route("/")
 @login_required
 def index():
@@ -98,7 +120,7 @@ def index():
         stock['current_price'] = usd(round(float(stock['current_price']), 2))
         stock['value'] = usd(round(stock['value'], 2))
     # update grand total
-    grand_total = round(portfolio, 2) + round(cash, 2)
+    grand_total = round(Decimal(portfolio), 2) + round(cash, 2)
     return render_template("index.html", balance = usd(round(cash, 2)), grand_total = usd(round(grand_total, 2)), portfolio = usd(round(portfolio, 2)), stocks = stocks)
 
 @app.route("/account", methods=["GET", "POST"])
@@ -188,7 +210,7 @@ def buy():
         # db.execute("UPDATE portfolio SET cash = cash - :cost WHERE id = :id")
         # remove the cost from our cash BOTH in the database and from our variable here
         db.execute("UPDATE users SET cash = cash - :cost WHERE id = :id", cost = round(cost, 2), id = id)
-        cash -= round(cost, 2)
+        cash -= round(Decimal(cost), 2)
         test = db.execute("SELECT * FROM portfolio WHERE id = :id AND symbol = :symbol", id = id, symbol = symbol)
         if len(test) == 0:
             db.execute("INSERT INTO portfolio (id, quantity, stock, symbol) VALUES (:id, :quantity, :stock_name, :symbol)", id = id, quantity = int(quantity), stock_name = stock_name, symbol = symbol)        
@@ -201,13 +223,12 @@ def buy():
         
         portfolio = 0.0
         grand_total = 0.0
-        
-        
+
+        test = db.execute("INSERT INTO history (id, stock, quantity, purchase_price, type) VALUES (:id, :symbol, :quantity, :purchase_price, :type)", id = id, symbol = symbol, quantity = quantity, purchase_price = price, type = type)
         # update history
         db.execute("INSERT INTO history (id, stock, quantity, purchase_price, type) VALUES (:id, :symbol, :quantity, :purchase_price, :type)", id = id, symbol = symbol, quantity = quantity, purchase_price = price, type = type)
         for stock in stocks:
             # make new 'current_price' key for each stock
-            # return apology(stock['stock'])
             temp = lookup(stock['symbol'])
             stock['current_price'] = temp['price']
             stock['symbol'] = temp['symbol']
@@ -220,35 +241,12 @@ def buy():
             # update total_owned
             total_owned += stock['quantity']
 
-        # debugging: we never get to this point
-        # debugging: oop, we did just get to this point...
-        # return apology("here?") 
-        
         # update grand total
-        grand_total = round(portfolio, 2) + round(cash, 2)
-        
-        # USD things
-        # stock['current_price'] = usd(stock['current_price'])
-        # stock['value'] = usd(stock['value'])
-        
-        
-        # adjust user's cash holdings
-        # ? ? ?
-        # from here: https://stackoverflow.com/questions/6699360/flask-sqlalchemy-update-a-rows-information
-        # user = users.query.get(5)
-        # user.name = 'New 
-        # db.session.commit()
-        
-        
-        # return apology(str(cash))
-        # return apology(usd(cash))
+        grand_total = round(Decimal(portfolio), 2) + round(Decimal(cash), 2)
 
         # variable to control index.html
         buying = True
         
-        # debugging: we never get to this point
-        # return apology("here?") 
-        # return redirect(url_for("index")) #, balance = usd(round(cash, 2)), buying = buying, cost = usd(round(cost, 2)), grand_total = usd(round(grand_total, 2)), portfolio = usd(round(portfolio, 2)), quantity = int(quantity), stocks = stocks, symbol = symbol, total_owned = total_owned, type = type)
         return render_template("index.html", balance = usd(round(cash, 2)), buying = buying, cost = usd(round(cost, 2)), grand_total = usd(round(grand_total, 2)), portfolio = usd(round(portfolio, 2)), quantity = int(quantity), stocks = stocks, symbol = symbol, total_owned = total_owned, type = type)
         
         
@@ -268,11 +266,10 @@ def history():
     stocks = db.execute("SELECT DISTINCT stock FROM history WHERE id = :id", id = id)
     current_prices = {}
     
-    # counter_if = 0
-    # counter_el = 0
-    
     for stock in stocks:
         temp = lookup(stock['stock'])
+        if temp == None:
+            return apology("sorry, stock prices unavailable. please try again later.")
         current_prices[stock['stock']] = usd(float(format(round(temp['price'], 2), '.2f')))
         
     for row in rows:
@@ -280,7 +277,6 @@ def history():
     
     return render_template("history.html", rows = rows,  current_prices = current_prices)
     # if error:
-    return apology("TODO")
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -355,64 +351,32 @@ def quote():
     
     id = session.get("user_id") # id = session['user_id']
     
-    # WT: For quote we have three to-dos
-    
-    # WT: display the form for the user to look up the stock
-    
-    # WT: retrieve the quote for the stock
-    
-    # WT: display the current price for the stock
-    
     # if user reached route via POST (as by submitting a form via POST)
-    if request.method == "POST":
-
-        # set values from received
-        # name = information.name
-        # price = information.price
-        # symbol = information.symbol     # stock should == symbol though, right?
-
-        # print(name, price, symbol)
-        
-        
-        
+    if request.method == "POST":    
         stock = request.form.get("stock")
-        
         # ensure stock was submitted
         if stock == None:
             return apology("must provide stock to look up")
-        
         information = lookup(stock)
+        
+        # return apology(str(type(information)))
         
         # ensure stock code is valid
         if information == None:
-            return apology("must provide a valid stock symbol")
+            return apology("must provide a valid stock symbol (you may have made too many requests)")
         else:
             # set values from received
-            # name = information[row[1]] # name
+            # debugging
+            # return apology(str(information))
+            # return apology(str(type(information)))
             name = information['name']
-            # price = information[price]
             price = information['price']
-            # symbol = information[row[0].upper()] # symbol
             symbol = information['symbol']
+            # pass
             
-            # print(name, price, symbol)  
-
-        # return redirect("http://www.google.com")
-            
-
-        # do I need to do this?
-        # WT:
-        # "when we call render_template() we're allowed to pass in values"
-        # return render_template(url_for('quoted')) # , name = name, price = price, symbol = symbol)
-        # return redirect("/quoted.html") # , name = name, price = price, symbol = symbol)
         return render_template("quoted.html", name = name, price = price, symbol = symbol)
-
-    # else if user reached route via GET (as by clicking a link or via redirect)
-    # When a user visits /quote via GET, render one of those templates, inside of
-    # which should be an HTML form that submits to /quote via POST. 
     else:
         return render_template("quote.html")  # , name = name, price = price, symbol = symbol)
-    
     
     return apology("no stock with the code ____ exists")
 
@@ -442,56 +406,24 @@ def register():
         # ensure second password was submitted
         elif not request.form.get("password_confirmed"):
             return apology("must provide password twice")
-
-        # is this the same as what I do with the SQL code above?
-        # registrant = Registrant(request.form["username"], request.form["password"])
-        # "this adds to [your] database session so to speak" ...okay
-        # db.session.add(user)
-        # db.session.commit()
         
         # ensure password is correct
-        # not working for unknown reasons so...
-        # if (pwd_context.verify(request.form.get("password"), request.form.get("password_confirmed"), user=request.form.get("username"))) == False:
         if request.form.get("password") != request.form.get("password_confirmed"):
             # nothin'
         # else:
             return apology("passwords do not match")
 
         # encrypt password (how secure is this?)
-        # this one is from the WT
         hash = pwd_context.hash(request.form.get("password"))
-        # crypt_obj = CryptContext(schemes = ["sha256_crypt", "md5_crypt", "des_crypt"], default="des_crypt")
-        # hash = crypt_obj.hash(request.form.get("password"))
-        # add new user to database / ensure username does not exist
-        # this line won't work but the idea is right
-        # if (request.form.get("username")) == db.execute("SELECT * FROM users WHERE username = :username", username = request.form.get("username")):
-        # WT:
-        # apparently this is the correct way:
         result = db.execute("INSERT INTO users (email, username, hash) VALUES (:email, :username, :hash)", email = request.form.get("email"), username = request.form.get("username"), hash = hash)
         if not result:
             return apology("username taken")
-        # do I need this line? or will it actually already happen above? I think this actually is needed!
-        # easy to test though
         db.execute("INSERT INTO users (username, hash) VALUES (:username, :hash)", username = request.form.get("username"), hash = hash)
-        # na not this
-        # rows = db.execute("INSERT INTO users (username, password) VALUES (:username, :password), username = request.form.get("username")), password = password)
-
         # remember which user has been created and is logged in
-        # this can't be right!
-        # session["user_id"] = "id"
-        # debugging
-        # return apology(str(result))
-        # session['user_id'] = result[0]['id']
         session['user_id'] = result
         
-        # redirect user to home page
-        # TemplateNotFound error
-        # return redirect(url_for("index"))
-        # return render_template("index.html")
+        # redirect user to success page
         return redirect(url_for("success"))
-        # return redirect(url_for("/")
-
-    # else if user reached route via GET (as by clicking a link or via redirect)
     else:
         return render_template("register.html")
     
@@ -525,12 +457,7 @@ def sell():
         rows_user = db.execute("SELECT cash FROM users WHERE id = :id", id = id)
         rows_portfolio = db.execute("SELECT * FROM portfolio WHERE id = :id AND symbol = :stock", id = id, stock = stock)
         cash = round(rows_user[0]['cash'], 2)
-        # debugging
-        # return apology(str(type(rows_portfolio)))
         quantity_on_hand = rows_portfolio[0]['quantity']
-        
-        
-        
         # ensure stock was submitted
         if stock == None:
             return apology("must provide valid stock symbol")
@@ -556,7 +483,7 @@ def sell():
 
         # add cash back to user
         db.execute("UPDATE users SET cash = cash + :sale_value WHERE id = :id", sale_value = sale_value, id = id)
-        cash += round(sale_value, 2)
+        cash += round(Decimal(sale_value), 2)
 
         # remove shares from user's portfolio
         db.execute("UPDATE portfolio SET quantity = quantity - :quantity WHERE id = :id AND stock = :stock AND symbol = :symbol", quantity = int(quantity), id = id, stock = stock, symbol = symbol)
@@ -587,7 +514,7 @@ def sell():
             stock['value'] = usd(stock['value'])
 
         # update grand total
-        grand_total = portfolio + cash
+        grand_total = Decimal(portfolio) + cash
         
         # variable to control index.html
         selling = True
@@ -606,8 +533,7 @@ def success():
     id = session.get("user_id") # id = session['user_id']
 
     return render_template("success.html")
-            
-            
+
 
 # https://medium.com/@anyazhang/publishing-a-flask-web-app-from-the-cs50-ide-to-heroku-osx-e00a45338c14:
 # "If you don’t do this, nothing will happen when you run your code."

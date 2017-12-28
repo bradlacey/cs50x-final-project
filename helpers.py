@@ -1,8 +1,11 @@
 import csv
+import quandl			# for my API call later
 import urllib.request
 
 from flask import redirect, render_template, request, session
 from functools import wraps
+
+quandl.ApiConfig.api_key = "Yp6bSmznThD2mfDnUFyQ"
 
 
 def apology(message, code=400):
@@ -36,6 +39,16 @@ def login_required(f):
 
 def lookup(symbol):
     """Look up quote for symbol."""
+    
+    # debugging
+    # used because the data requests seem inconsistent
+    # - Yahoo!'s is dead altogether
+    # - AlphaAdvantage only works sometimes
+    # return {
+    # 	"name": "Google",
+	# 	"price": 1000,
+	# 	"symbol": "GOOG"
+	# }
 
     # reject symbol if it starts with caret
     if symbol.startswith("^"):
@@ -44,6 +57,46 @@ def lookup(symbol):
     # reject symbol if it contains comma
     if "," in symbol:
         return None
+        
+        
+	# Here's another shot at it...
+	
+	# query QuandL for quote
+	# https://blog.quandl.com/api-for-stock-data
+    try:
+        url = "https://www.quandl.com/api/v3/datasets/EOD/"
+        url += symbol
+        url += ".csv?api_key=Yp6bSmznThD2mfDnUFyQ&column_index=1&rows=1"
+        # full URL: https://www.quandl.com/api/v3/datasets/EOD/{{symbol}}.csv?api_key=Yp6bSmznThD2mfDnUFyQ&column_index=1&rows=1
+        # e.g.:     https://www.quandl.com/api/v3/datasets/EOD/AAPL.csv?api_key=Yp6bSmznThD2mfDnUFyQ&column_index=1&rows=1
+        
+        request = "EOD/"
+        request += symbol
+        
+        
+        data_start = 48
+        
+        # ABOVE: TESTED
+        
+        # see documentation:
+        # https://docs.quandl.com/docs/in-depth-usage
+        
+        # HERE : TESTING
+        
+        data = quandl.get(request, column_index=1, rows=1)
+        data = str(data)
+        data = data[data_start:]
+		
+		# return stock's name (as a str), price (as a float), and (uppercased) symbol (as a str)
+        return {
+            "name": symbol,
+            "price": Decimal(data).quantize(TWOPLACES),
+            "symbol": symbol
+        }
+        
+    except:
+    	pass
+
 
     # query Yahoo for quote
     # http://stackoverflow.com/a/21351911
@@ -97,7 +150,6 @@ def lookup(symbol):
             price = float(row[4])
         except:
             return None
-
         # return stock's name (as a str), price (as a float), and (uppercased) symbol (as a str)
         return {
             "name": symbol.upper(), # for backward compatibility with Yahoo
