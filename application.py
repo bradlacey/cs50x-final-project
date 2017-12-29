@@ -25,7 +25,7 @@ import time
 import urllib.parse as urlparse
 import psycopg2
 
-urlparse.uses_netloc.append("postgres")
+urlparse.uses_netloc.append("postgresql")
 url = urlparse.urlparse(os.environ["DATABASE_URL"])
 
 conn = psycopg2.connect(
