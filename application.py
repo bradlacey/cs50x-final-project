@@ -3,10 +3,11 @@
 
 # coding: utf-8
 
-# from library50 import cs50
 from decimal import *
 from flask import Flask, flash, redirect, render_template, request, session, url_for
 from flask_session import Session
+# from library50 import cs50
+from cs50 import SQL
 from passlib.apps import custom_app_context as pwd_context
 from passlib.context import CryptContext
 from tempfile import mkdtemp
@@ -15,7 +16,7 @@ from tempfile import mkdtemp
 from decimal import *
 from helpers import *
 
-import cs50
+# import cs50
 import os
 import sqlalchemy
 import time
