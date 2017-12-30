@@ -3,11 +3,10 @@
 
 # coding: utf-8
 
+# from library50 import cs50		# "No module named 'library50'"
 from decimal import *
 from flask import Flask, flash, redirect, render_template, request, session, url_for
 from flask_session import Session
-# from library50 import cs50
-from cs50 import SQL
 from passlib.apps import custom_app_context as pwd_context
 from passlib.context import CryptContext
 from tempfile import mkdtemp
@@ -16,7 +15,7 @@ from tempfile import mkdtemp
 from decimal import *
 from helpers import *
 
-# import cs50
+import cs50
 import os
 import sqlalchemy
 import time
@@ -38,13 +37,32 @@ conn = psycopg2.connect(
 )
 
 
-# https://stackoverflow.com/questions/37910066/heroku-sqlalchemy-database-does-not-exist
-# solution to deployment issue?
-if "ON_HEROKU" not in os.environ:
-    if not database_exists(self.engine.url):
-        logging.info("Database not found")
-        create_database(self.engine.url)
-        logging.info("Database created")
+# added as per the following
+# https://medium.com/@anyazhang/publishing-a-flask-web-app-from-the-cs50-ide-to-heroku-osx-e00a45338c14
+class SQL(object):
+    def __init__(self, url):
+        try:
+            self.engine = sqlalchemy.create_engine(url)
+        except Exception as e:
+            raise RuntimeError(e)
+    def execute(self, text, *multiparams, **params):
+        try:
+            statement = sqlalchemy.text(text).bindparams(*multiparams, **params)
+            result = self.engine.execute(str(statement.compile(compile_kwargs={"literal_binds": True})))
+            # SELECT
+            if result.returns_rows:
+                rows = result.fetchall()
+                return [dict(row) for row in rows]
+            # INSERT
+            elif result.lastrowid is not None:
+                return result.lastrowid
+            # DELETE, UPDATE
+            else:
+                return result.rowcount
+        except sqlalchemy.exc.IntegrityError:
+            return None
+        except Exception as e:
+            raise RuntimeError(e)
 
 
 # configure application
