@@ -496,7 +496,7 @@ def sell():
         grand_total = 0.0
 
         # update history
-        db.execute("INSERT INTO history (id, purchase_price, quantity, stock, type) VALUES (:id, :purchase_price, :quantity, :name, :type)", id = id, purchase_price = price, quantity = quantity, name = name, type = type)
+        db.execute("INSERT INTO history (id, purchase_price, quantity, stock, type) VALUES (:id, :purchase_price, :quantity, :symbol, :type)", id = id, purchase_price = price, quantity = quantity, symbol = symbol, type = type)
 
         # fill list so we can populate our HTML table
         for stock in stocks:

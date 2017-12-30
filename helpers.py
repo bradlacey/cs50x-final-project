@@ -7,7 +7,6 @@ from functools import wraps
 
 quandl.ApiConfig.api_key = "Yp6bSmznThD2mfDnUFyQ"
 
-
 def apology(message, code=400):
     """Renders message as an apology to user."""
     def escape(s):
@@ -73,7 +72,7 @@ def lookup(symbol):
         request = "EOD/"
         request += symbol
         
-        
+        # shift 48 spaces to account for whitespace in data
         data_start = 48
         
         # ABOVE: TESTED
