@@ -38,10 +38,6 @@ conn = psycopg2.connect(
 )
 
 
-# set the secret key.  keep this really secret:
-app.secret_key = os.urandom(24)
-
-
 # added as per the following
 # https://medium.com/@anyazhang/publishing-a-flask-web-app-from-the-cs50-ide-to-heroku-osx-e00a45338c14
 class SQL(object):
@@ -81,6 +77,11 @@ if app.config["DEBUG"]:
         response.headers["Expires"] = 0
         response.headers["Pragma"] = "no-cache"
         return response
+        
+
+# set the secret key.  keep this really secret:
+app.secret_key = os.urandom(24)
+
 
 # custom filter
 app.jinja_env.filters["usd"] = usd
