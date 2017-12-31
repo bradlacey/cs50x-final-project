@@ -80,8 +80,8 @@ if app.config["DEBUG"]:
         
 
 # set the secret key.  keep this really secret:
-app.secret_key = os.urandom(24)
-
+# app.secret_key = os.urandom(24)
+app.secret_key = "doogiehowser"
 
 # custom filter
 app.jinja_env.filters["usd"] = usd
