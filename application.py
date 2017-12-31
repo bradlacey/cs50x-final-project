@@ -29,7 +29,7 @@ urlparse.uses_netloc.append("postgres")
 url = urlparse.urlparse(os.environ["DATABASE_URL"])
 
 conn = psycopg2.connect(
-	database=url.username,
+	database="me",
 	user=url.username,
 	password=url.password,
 	host=url.hostname,
