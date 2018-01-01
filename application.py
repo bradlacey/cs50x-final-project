@@ -91,7 +91,7 @@ app.jinja_env.filters["usd"] = usd
 # app.config["SESSION_PERMANENT"] = False
 # app.config["SESSION_PERMANENT"] = True
 # app.config["SESSION_TYPE"] = "filesystem"
-app.config["SESSION_TYPE"] = "
+app.config["SESSION_TYPE"] = "sqlalchemy"
 Session(app)
 
 
