@@ -594,7 +594,8 @@ def success():
 if __name__ == "__main__":
     # set the secret key.  keep this really secret:
     # app.secret_key = os.urandom(24)
-    app.secret_key = "doogiehowser"
+    # app.secret_key = "doogiehowser"
+    app.secret_key = "billyraycyrus"
     # app.debug = True
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
