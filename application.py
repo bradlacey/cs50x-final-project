@@ -86,12 +86,13 @@ app.jinja_env.filters["usd"] = usd
 
 
 # configure session to use filesystem (instead of signed cookies)
-# login troubleshooting 7, 8, 9
+# login troubleshooting 7, 8, 9, 10
 # app.config["SESSION_FILE_DIR"] = mkdtemp()
 # app.config["SESSION_PERMANENT"] = False
 # app.config["SESSION_PERMANENT"] = True
 # app.config["SESSION_TYPE"] = "filesystem"
-app.config["SESSION_TYPE"] = "sqlalchemy"
+# app.config["SESSION_TYPE"] = "sqlalchemy"
+app.config["SESSION_TYPE"] = "memcached"
 Session(app)
 
 
