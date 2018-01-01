@@ -1,4 +1,5 @@
-# Thanks to Anya Zhang:
+# Thanks to Anya Zhang -- many modifications to my CS50 Finance pset come directly from 
+# the following tutorial:
 # https://medium.com/@anyazhang/publishing-a-flask-web-app-from-the-cs50-ide-to-heroku-osx-e00a45338c14
 
 # coding: utf-8
@@ -317,7 +318,7 @@ def login():
         session["user_id"] = rows[0]["id"]
 
         # redirect user to home page
-        return render_template("index.html", username = username)
+        return render_template("index.html", username = username, id = session["user_id"])
 
     # else if user reached route via GET (as by clicking a link or via redirect)
     else:
