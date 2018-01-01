@@ -86,14 +86,15 @@ app.jinja_env.filters["usd"] = usd
 
 
 # configure session to use filesystem (instead of signed cookies)
-# login troubleshooting 7, 8, 9, 10, 14
+# login troubleshooting 7, 8, 9, 10, 14, 15
 # http://pythonhosted.org/Flask-Session/
 # "this can also be an integer representing seconds"
 app.config["PERMANENT_SESSION_LIFETIME"] = 1800
 app.config["SESSION_FILE_DIR"] = mkdtemp()
+# SESSION_PERMANENT...default to be True
 # app.config["SESSION_PERMANENT"] = False
-app.config["SESSION_PERMANENT"] = True
 app.config["SESSION_TYPE"] = "filesystem"
+# app.config["SESSION_TYPE"] = "null"
 # app.config["SESSION_TYPE"] = "sqlalchemy"
 # app.config["SESSION_TYPE"] = "memcached"
 
@@ -594,6 +595,6 @@ if __name__ == "__main__":
     # set the secret key.  keep this really secret:
     # app.secret_key = os.urandom(24)
     app.secret_key = "doogiehowser"
-    app.debug = True
+    # app.debug = True
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
