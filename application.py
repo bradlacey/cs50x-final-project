@@ -78,11 +78,7 @@ if app.config["DEBUG"]:
         response.headers["Expires"] = 0
         response.headers["Pragma"] = "no-cache"
         return response
-        
 
-# set the secret key.  keep this really secret:
-# app.secret_key = os.urandom(24)
-app.secret_key = "doogiehowser"
 
 # custom filter
 app.jinja_env.filters["usd"] = usd
@@ -106,6 +102,7 @@ stock_names = []
         
         
 # http://connor-johnson.com/2016/01/22/using-sessions-in-flask/
+# login troubleshooting 5 - session.permanent = True
 @app.before_request
 def session_management():
     # make the session last indefinitely until it is cleared
@@ -567,6 +564,9 @@ def success():
 # https://medium.com/@anyazhang/publishing-a-flask-web-app-from-the-cs50-ide-to-heroku-osx-e00a45338c14:
 # "If you don’t do this, nothing will happen when you run your code."
 if __name__ == "__main__":
-	app.debug = True
-	port = int(os.environ.get("PORT", 5000))
-	app.run(host="0.0.0.0", port=port)
+    # set the secret key.  keep this really secret:
+    # app.secret_key = os.urandom(24)
+    app.secret_key = "doogiehowser"
+    app.debug = True
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
