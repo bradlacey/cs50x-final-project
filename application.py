@@ -291,8 +291,9 @@ def history():
 def login():
     """Log user in."""
 
+    # moving this as part of login troubleshooting 4
     # forget any user_id
-    session.clear()
+    # session.clear()
 
     # if user reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
@@ -329,6 +330,8 @@ def login():
 
     # else if user reached route via GET (as by clicking a link or via redirect)
     else:
+        # login troubleshooting 4 - moving session.clear()
+        session.clear()
         return render_template("login.html")
 
 
