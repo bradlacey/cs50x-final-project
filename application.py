@@ -315,9 +315,14 @@ def login():
             return apology("invalid username and/or password")
 
         # remember which user has logged in
-        # login troubleshooting 2:
-        # session["user_id"] = rows[0]["id"]
-        id = session.get("user_id")
+        # original
+        # session["user_id"] = rows[0]["id"]		# original
+        
+        # login troubleshooting 2.1:
+        # id = session.get("user_id")
+        
+        # login troubleshooting 3 - back to original:
+        session["user_id"] = rows[0]["id"]
 		
         # redirect user to home page
         return render_template("index.html", username = username) # id = session["user_id"]) # didn't work
