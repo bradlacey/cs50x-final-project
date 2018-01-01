@@ -315,10 +315,12 @@ def login():
             return apology("invalid username and/or password")
 
         # remember which user has logged in
-        session["user_id"] = rows[0]["id"]
-
+        # login troubleshooting 2:
+        # session["user_id"] = rows[0]["id"]
+		id = session.get("user_id")
+		
         # redirect user to home page
-        return render_template("index.html", username = username, id = session["user_id"])
+        return render_template("index.html", username = username) # id = session["user_id"]) # didn't work
 
     # else if user reached route via GET (as by clicking a link or via redirect)
     else:
