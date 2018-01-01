@@ -120,7 +120,9 @@ stock_names = []
 @app.route("/")
 @login_required
 def index():
-    id = session.get("user_id")
+    # login troubleshooting 12 - remove id setting
+    # id = session.get("user_id")
+    id = session['user_id']
     
     cash_in = db.execute("SELECT cash FROM users WHERE id = :id", id = id)
     cash = round(cash_in[0]['cash'], 2)
@@ -146,7 +148,8 @@ def index():
 @app.route("/account", methods=["GET", "POST"])
 @login_required
 def account():
-    id = session.get("user_id") # id = session['user_id']
+    # login troubleshooting 12 - remove id setting
+    id = session['user_id'] # id = session['user_id']
     
     if request.method == "POST":
         # ensure old password was submitted
@@ -203,7 +206,8 @@ def buy():
     # so...
     # maybe...
     # these gymnastics?
-    session['user_id'] = id
+    # session['user_id'] = id
+    # yeah na m8
     
     if id == None:
         return apology("please log in")
@@ -316,7 +320,7 @@ def login():
 
     # moving this as part of login troubleshooting 4
     # forget any user_id
-    # session.clear()
+    session.clear()
 
     # if user reached route via POST (as by submitting a form via POST)
     if request.method == "POST":
@@ -354,7 +358,7 @@ def login():
     # else if user reached route via GET (as by clicking a link or via redirect)
     else:
         # login troubleshooting 4 - moving session.clear()
-        session.clear()
+        # session.clear()
         return render_template("login.html")
 
 
