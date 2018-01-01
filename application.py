@@ -184,6 +184,7 @@ def buy():
     # original:
     # id = session.get("user_id")
     # id troubleshooting 1 - changed id in buy()
+    # seems to be no difference
     id = session['user_id']
     if id == None:
         return apology("please log in")
