@@ -317,7 +317,7 @@ def login():
         # remember which user has logged in
         # login troubleshooting 2:
         # session["user_id"] = rows[0]["id"]
-		id = session.get("user_id")
+        id = session.get("user_id")
 		
         # redirect user to home page
         return render_template("index.html", username = username) # id = session["user_id"]) # didn't work
