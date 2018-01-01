@@ -86,14 +86,16 @@ app.jinja_env.filters["usd"] = usd
 
 
 # configure session to use filesystem (instead of signed cookies)
-# login troubleshooting 7, 8, 9, 10
+# login troubleshooting 7, 8, 9, 10, 14
+# http://pythonhosted.org/Flask-Session/
+# "this can also be an integer representing seconds"
+app.config["PERMANENT_SESSION_LIFETIME"] = 1800
 app.config["SESSION_FILE_DIR"] = mkdtemp()
-app.config["SESSION_PERMANENT"] = False
-# app.config["SESSION_PERMANENT"] = True
+# app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_PERMANENT"] = True
 app.config["SESSION_TYPE"] = "filesystem"
 # app.config["SESSION_TYPE"] = "sqlalchemy"
 # app.config["SESSION_TYPE"] = "memcached"
-Session(app)
 
 
 # configure CS50 Library to use SQLite database
@@ -107,6 +109,11 @@ db = SQL(os.environ["DATABASE_URL"])
 
 # global
 stock_names = []
+
+
+# http://pythonhosted.org/Flask-Session/
+# "you should configure your app first before you pass it to Flask-Session"
+Session(app)
         
         
 # http://connor-johnson.com/2016/01/22/using-sessions-in-flask/
