@@ -70,6 +70,7 @@ class SQL(object):
 # configure application
 app = Flask(__name__)
 
+
 # ensure responses aren't cached # so that we get fresh data every time
 if app.config["DEBUG"]:
     @app.after_request
@@ -83,11 +84,20 @@ if app.config["DEBUG"]:
 # custom filter
 app.jinja_env.filters["usd"] = usd
 
+
+# set the secret key.  keep this really secret:
+# app.secret_key = os.urandom(24)
+app.secret_key = "doogiehowser"
+
+
 # configure session to use filesystem (instead of signed cookies)
+# login troubleshooting 7
 app.config["SESSION_FILE_DIR"] = mkdtemp()
-app.config["SESSION_PERMANENT"] = False
+# app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_PERMANENT"] = True
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
+
 
 # configure CS50 Library to use SQLite database
 # https://medium.com/@anyazhang/publishing-a-flask-web-app-from-the-cs50-ide-to-heroku-osx-e00a45338c14:
@@ -564,9 +574,6 @@ def success():
 # https://medium.com/@anyazhang/publishing-a-flask-web-app-from-the-cs50-ide-to-heroku-osx-e00a45338c14:
 # "If you don’t do this, nothing will happen when you run your code."
 if __name__ == "__main__":
-    # set the secret key.  keep this really secret:
-    # app.secret_key = os.urandom(24)
-    app.secret_key = "doogiehowser"
     app.debug = True
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
