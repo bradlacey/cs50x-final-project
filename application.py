@@ -87,12 +87,12 @@ app.jinja_env.filters["usd"] = usd
 
 # configure session to use filesystem (instead of signed cookies)
 # login troubleshooting 7, 8, 9, 10
-# app.config["SESSION_FILE_DIR"] = mkdtemp()
-# app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_FILE_DIR"] = mkdtemp()
+app.config["SESSION_PERMANENT"] = False
 # app.config["SESSION_PERMANENT"] = True
-# app.config["SESSION_TYPE"] = "filesystem"
+app.config["SESSION_TYPE"] = "filesystem"
 # app.config["SESSION_TYPE"] = "sqlalchemy"
-app.config["SESSION_TYPE"] = "memcached"
+# app.config["SESSION_TYPE"] = "memcached"
 Session(app)
 
 
@@ -104,16 +104,17 @@ Session(app)
 db = SQL(os.environ["DATABASE_URL"])
 # db = sqlalchemy(app)
 
+
 # global
 stock_names = []
         
         
 # http://connor-johnson.com/2016/01/22/using-sessions-in-flask/
 # login troubleshooting 5 - session.permanent = True
-@app.before_request
-def session_management():
-    # make the session last indefinitely until it is cleared
-    session.permanent = True
+# @app.before_request
+# def session_management():
+#     # make the session last indefinitely until it is cleared
+#     session.permanent = True
 
 
 @app.route("/")
@@ -197,6 +198,13 @@ def buy():
     # id troubleshooting 1 - changed id in buy()
     # seems to be no difference
     id = session['user_id']
+    # login troubleshooting 11 - reversed id
+    # I know somewhere it said that Session doesn't take notice until its keys are updated...
+    # so...
+    # maybe...
+    # these gymnastics?
+    session['user_id'] = id
+    
     if id == None:
         return apology("please log in")
     if request.method == "POST":
