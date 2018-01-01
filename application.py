@@ -323,7 +323,7 @@ def login():
         # id = session.get("user_id")
         
         # login troubleshooting 3 - back to original:
-        session["user_id"] = rows[0]["id"]
+        session['user_id'] = rows[0]['id']
 		
         # redirect user to home page
         return render_template("index.html", username = username) # id = session["user_id"]) # didn't work
