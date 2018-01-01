@@ -295,7 +295,8 @@ def buy():
 def history():
     """Show history of transactions."""
     
-    id = session.get("user_id") # id = session['user_id']
+    # id = session.get("user_id") # id = session['user_id']
+    id = session['user_id']
     # use distinct so that rows contains no duplicates
     rows = db.execute("SELECT * FROM history WHERE id = :id", id = id)
     stocks = db.execute("SELECT DISTINCT stock FROM history WHERE id = :id", id = id)
