@@ -181,7 +181,10 @@ def account():
 def buy():
     """Buy shares of stock."""
     
-    id = session.get("user_id")
+    # original:
+    # id = session.get("user_id")
+    # id troubleshooting 1 - changed id in buy()
+    id = session['user_id']
     if id == None:
         return apology("please log in")
     if request.method == "POST":
