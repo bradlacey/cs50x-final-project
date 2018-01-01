@@ -105,6 +105,13 @@ db = SQL(os.environ["DATABASE_URL"])
 stock_names = []
         
         
+# http://connor-johnson.com/2016/01/22/using-sessions-in-flask/
+@app.before_request
+def session_management():
+    # make the session last indefinitely until it is cleared
+    session.permanent = True
+
+
 @app.route("/")
 @login_required
 def index():
