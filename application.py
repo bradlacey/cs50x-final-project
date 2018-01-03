@@ -479,9 +479,10 @@ def register():
         # redirect user to success page
         # return redirect(url_for("success"))
         
-        # login troubleshooting 16 - url_for("success") does not exist
-        return render_template("success.html")
-        
+        # login troubleshooting 16, 17 - url_for("success") does not exist
+        # return render_template("success.html")		# 16
+        return render_template("index.html")			# 17
+                
     else:
         return render_template("register.html")
     
