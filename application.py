@@ -477,7 +477,11 @@ def register():
         session['user_id'] = result
         
         # redirect user to success page
-        return redirect(url_for("success"))
+        # return redirect(url_for("success"))
+        
+        # login troubleshooting 16 - url_for("success") does not exist
+        return render_template("success.html")
+        
     else:
         return render_template("register.html")
     
@@ -596,6 +600,6 @@ if __name__ == "__main__":
     # app.secret_key = os.urandom(24)
     # app.secret_key = "doogiehowser"
     app.secret_key = "billyraycyrus"
-    # app.debug = True
+    W# app.debug = True
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
