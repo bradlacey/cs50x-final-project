@@ -469,10 +469,10 @@ def register():
 
         # encrypt password (how secure is this?)
         hash = pwd_context.hash(request.form.get("password"))
-        result = db.execute("INSERT INTO users (email, username, hash) VALUES (:email, :username, :hash)", email = request.form.get("email"), username = request.form.get("username"), hash = hash)
+        result = db.execute("INSERT INTO users (email, username, hash, id) VALUES (:email, :username, :hash, DEFAULT) RETURNING id", email = request.form.get("email"), username = request.form.get("username"), hash = hash)
         if not result:
             return apology("username taken")
-        db.execute("INSERT INTO users (username, hash) VALUES (:username, :hash)", username = request.form.get("username"), hash = hash)
+        # db.execute("INSERT INTO users (username, hash) VALUES (:username, :hash)", username = request.form.get("username"), hash = hash)
         # remember which user has been created and is logged in
         session['user_id'] = result
         
@@ -480,8 +480,8 @@ def register():
         # return redirect(url_for("success"))
         
         # login troubleshooting 16, 17 - url_for("success") does not exist
-        # return render_template("success.html")		# 16
-        return render_template("index.html")			# 17
+        # return render_template("success.html")							# 16
+        return render_template("index.html", username = request.form.get("username"))	# 17
                 
     else:
         return render_template("register.html")
