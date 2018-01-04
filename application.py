@@ -86,9 +86,6 @@ app.jinja_env.filters["usd"] = usd
 
 
 # configure session to use filesystem (instead of signed cookies)
-# login troubleshooting 7, 8, 9, 10, 14, 15
-# http://pythonhosted.org/Flask-Session/
-# "this can also be an integer representing seconds"
 app.config["SESSION_FILE_DIR"] = mkdtemp()
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
@@ -96,11 +93,7 @@ app.config["SESSION_TYPE"] = "filesystem"
 
 # configure CS50 Library to use SQLite database
 # https://medium.com/@anyazhang/publishing-a-flask-web-app-from-the-cs50-ide-to-heroku-osx-e00a45338c14:
-# "Change the line that used to read"
-# db = SQL("sqlite:///db.db")
-# "to"
 db = SQL(os.environ["DATABASE_URL"])
-# db = sqlalchemy(app)
 
 
 # global
@@ -110,21 +103,11 @@ stock_names = []
 # http://pythonhosted.org/Flask-Session/
 # "you should configure your app first before you pass it to Flask-Session"
 Session(app)
-        
-        
-# http://connor-johnson.com/2016/01/22/using-sessions-in-flask/
-# login troubleshooting 5 - session.permanent = True
-# @app.before_request
-# def session_management():
-#     # make the session last indefinitely until it is cleared
-#     session.permanent = True
 
 
 @app.route("/")
 @login_required
 def index():
-    # login troubleshooting 12 - remove id setting
-    # id = session.get("user_id")
     id = session['user_id']
     
     cash_in = db.execute("SELECT cash FROM users WHERE id = :id", id = id)
@@ -151,8 +134,7 @@ def index():
 @app.route("/account", methods=["GET", "POST"])
 @login_required
 def account():
-    # login troubleshooting 12 - remove id setting
-    id = session['user_id'] # id = session['user_id']
+    id = session['user_id']
     
     if request.method == "POST":
         # ensure old password was submitted
@@ -198,19 +180,8 @@ def account():
 @login_required
 def buy():
     """Buy shares of stock."""
-    
-    # original:
-    # id = session.get("user_id")
-    # id troubleshooting 1 - changed id in buy()
-    # seems to be no difference
+
     id = session['user_id']
-    # login troubleshooting 11 - reversed id
-    # I know somewhere it said that Session doesn't take notice until its keys are updated...
-    # so...
-    # maybe...
-    # these gymnastics?
-    # session['user_id'] = id
-    # yeah na m8
     
     if id == None:
         return apology("please log in")
@@ -245,7 +216,6 @@ def buy():
         if cost > cash:
             return apology("account balance too low for purchase")
         # subtract money from account
-        # db.execute("UPDATE portfolio SET cash = cash - :cost WHERE id = :id")
         # remove the cost from our cash BOTH in the database and from our variable here
         db.execute("UPDATE users SET cash = cash - :cost WHERE id = :id", cost = round(cost, 2), id = id)
         cash -= round(Decimal(cost), 2)
@@ -321,7 +291,6 @@ def history():
 def login():
     """Log user in."""
 
-    # moving this as part of login troubleshooting 4
     # forget any user_id
     session.clear()
 
@@ -346,15 +315,6 @@ def login():
             return apology("invalid username and/or password")
 
         # remember which user has logged in
-        # original
-        # session["user_id"] = rows[0]["id"]		# original
-        
-        # login troubleshooting 2.1:
-        # id = session.get("user_id")
-        
-        # login troubleshooting 3 - back to original:
-        # debugging
-        # return apology(str(rows[0]['id']))	# is working
         session['user_id'] = rows[0]['id']
 		
         # redirect user to home page
@@ -362,8 +322,6 @@ def login():
 
     # else if user reached route via GET (as by clicking a link or via redirect)
     else:
-        # login troubleshooting 4 - moving session.clear()
-        # session.clear()
         return render_template("login.html")
 
 
@@ -409,16 +367,11 @@ def quote():
             return apology("must provide stock to look up")
         information = lookup(stock)
         
-        # return apology(str(type(information)))
-        
         # ensure stock code is valid
         if information == None:
             return apology("must provide a valid stock symbol (you may have made too many requests)")
         else:
             # set values from received
-            # debugging
-            # return apology(str(information))
-            # return apology(str(type(information)))
             name = information['name']
             price = information['price']
             symbol = information['symbol']
@@ -471,13 +424,8 @@ def register():
         # db.execute("INSERT INTO users (username, hash) VALUES (:username, :hash)", username = request.form.get("username"), hash = hash)
         # remember which user has been created and is logged in
         session['user_id'] = result
-        
-        # redirect user to success page
-        # return redirect(url_for("success"))
-        
-        # login troubleshooting 16, 17 - url_for("success") does not exist
-        # return render_template("success.html")							# 16
-        return render_template("index.html", username = request.form.get("username"))	# 17
+
+        return render_template("index.html", username = request.form.get("username"))
                 
     else:
         return render_template("register.html")
