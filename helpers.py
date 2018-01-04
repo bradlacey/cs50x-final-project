@@ -1,5 +1,3 @@
-from flask import Flask, flash, redirect, render_template, request, session, url_for
-
 import csv
 import quandl			# for my API call later
 import urllib.request
@@ -33,7 +31,7 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if session.get("user_id") is None:
-            return redirect(url_for("login", next=request.url))
+            return redirect("/login")
         return f(*args, **kwargs)
     return decorated_function
 
