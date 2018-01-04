@@ -89,14 +89,9 @@ app.jinja_env.filters["usd"] = usd
 # login troubleshooting 7, 8, 9, 10, 14, 15
 # http://pythonhosted.org/Flask-Session/
 # "this can also be an integer representing seconds"
-app.config["PERMANENT_SESSION_LIFETIME"] = 1800
 app.config["SESSION_FILE_DIR"] = mkdtemp()
-# SESSION_PERMANENT...default to be True
-# app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
-# app.config["SESSION_TYPE"] = "null"
-# app.config["SESSION_TYPE"] = "sqlalchemy"
-# app.config["SESSION_TYPE"] = "memcached"
 
 
 # configure CS50 Library to use SQLite database
@@ -267,7 +262,6 @@ def buy():
         portfolio = 0.0
         grand_total = 0.0
 
-        test = db.execute("INSERT INTO history (id, stock, quantity, purchase_price, type) VALUES (:id, :symbol, :quantity, :purchase_price, :type)", id = id, symbol = symbol, quantity = quantity, purchase_price = price, type = type)
         # update history
         db.execute("INSERT INTO history (id, stock, quantity, purchase_price, type) VALUES (:id, :symbol, :quantity, :purchase_price, :type)", id = id, symbol = symbol, quantity = quantity, purchase_price = price, type = type)
         for stock in stocks:
@@ -359,6 +353,8 @@ def login():
         # id = session.get("user_id")
         
         # login troubleshooting 3 - back to original:
+        # debugging
+        # return apology(str(rows[0]['id']))	# is working
         session['user_id'] = rows[0]['id']
 		
         # redirect user to home page
